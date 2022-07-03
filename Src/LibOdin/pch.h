@@ -9,6 +9,7 @@
 #include <afxinet.h>
 #include <afxcmn.h>
 #include <vector>
+#include <algorithm>
 
 #pragma comment(lib, "Cabinet.lib")
 

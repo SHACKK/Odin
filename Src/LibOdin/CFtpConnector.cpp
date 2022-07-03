@@ -19,9 +19,7 @@ BOOL CFTPConnector::Connect(LPCTSTR szIP, int wPort, LPCTSTR strUserID, LPCTSTR 
 	try
 	{
 		m_pSession = new CInternetSession;
-		m_pFtp = m_pSession->GetFtpConnection(TEXT("127.0.0.1"), TEXT("ftp_user"), TEXT("qlalf1231@"), 21, bPassive);
-		//m_pFtp = m_pSession->GetFtpConnection(TEXT("172.30.100.179"), TEXT("Valkyrie"), TEXT("qwe123!@#"), 21, 0);
-	    //m_pFtp = m_pSession->GetFtpConnection(szIP, strUserID, strUserPW, wPort, 0);
+		m_pFtp = m_pSession->GetFtpConnection(szIP, strUserID, strUserPW, wPort, 0);
 		m_bConnect = TRUE;
 		return TRUE;
 	}
@@ -204,14 +202,15 @@ BOOL CFTPConnector::DownloadSingleFile(LPCTSTR strHash, LPCTSTR strLocalPath, LP
 			return FALSE;
 		}
 
-
 		// zip 파일 생성 및 설정
 		zipFile zf = zipOpen(CT2A(strLocalPath), APPEND_STATUS_CREATE);
 		zip_fileinfo zf_info;
 		memset(&zf_info, 0, sizeof(zip_fileinfo));
+
 		time_t nt;
 		time(&nt);
-		tm* tmdata = localtime(&nt);
+		tm* tmdata = NULL;
+		localtime_s(tmdata, &nt);
 		zf_info.tmz_date.tm_hour = tmdata->tm_hour;
 		zf_info.tmz_date.tm_mday = tmdata->tm_mday;
 		zf_info.tmz_date.tm_min = tmdata->tm_min;
@@ -261,7 +260,7 @@ BOOL CFTPConnector::DownloadSingleFile(LPCTSTR strHash, LPCTSTR strLocalPath, LP
 				/*                    */   Z_DEFAULT_COMPRESSION);
 		}
 
-		if(ProgressBar != NULL)	ProgressBar->SetRange(0, 100);
+		if (ProgressBar != NULL)	ProgressBar->SetRange(0, 100);
 		ULONGLONG nTotalSize = m_pInternetFile->GetLength();
 		ULONGLONG nReadSize = 0;
 
@@ -275,8 +274,8 @@ BOOL CFTPConnector::DownloadSingleFile(LPCTSTR strHash, LPCTSTR strLocalPath, LP
 			if (0 == unRead)	break;
 
 			zipWriteInFileInZip(zf, (const void*)byBuff, unRead);
-			int nPos = (nReadSize/nTotalSize)*100;
-			if(ProgressBar != NULL)	ProgressBar->SetPos(nPos);
+			int nPos = (nReadSize / nTotalSize) * 100;
+			if (ProgressBar != NULL)	ProgressBar->SetPos(nPos);
 		} while (true);
 
 		zipCloseFileInZip(zf);
@@ -307,7 +306,7 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 	CString strLocal = strLocalPath;
 	int nLength = strLocal.GetLength();
 	CString strExt = strLocal.Mid(nLength - 4, nLength);
-	if (!_tcscmp(strExt, TEXT(".zip")) || nLength == 0)
+	if (_tcscmp(strExt, TEXT(".zip")) || nLength == 0)
 	{
 		m_strErrorMessage = TEXT("Local 확장자를 확인하세요");
 		return FALSE;
@@ -321,8 +320,10 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 		memset(&zf_info, 0, sizeof(zip_fileinfo));
 
 		time_t nt;
+		tm* tmdata = NULL;
 		time(&nt);
-		tm* tmdata = localtime(&nt);
+		localtime_s(tmdata, &nt);
+
 		zf_info.tmz_date.tm_hour = tmdata->tm_hour;
 		zf_info.tmz_date.tm_mday = tmdata->tm_mday;
 		zf_info.tmz_date.tm_min = tmdata->tm_min;
@@ -330,14 +331,14 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 		zf_info.tmz_date.tm_sec = tmdata->tm_sec;
 		zf_info.tmz_date.tm_year = tmdata->tm_year;
 
-		if(ProgressBar != NULL)	ProgressBar->SetRange(0, (short)vecHash.size());
+		if (ProgressBar != NULL)	ProgressBar->SetRange(0, (short)vecHash.size());
 		int nComplete = 0;
 
 		for (auto iter : vecHash)
 		{
 			CString strFileName = GetFullFilePath(iter, TEXT("/"));
 			if (strFileName.IsEmpty())	continue;
-			
+
 			// Get CRC
 			uLong crc = 0;
 			m_pInternetFile = m_pFtp->OpenFile(strFileName, GENERIC_READ);
@@ -362,34 +363,34 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 			if (strPassword != NULL)
 			{
 				nRet = zipOpenNewFileInZip3(zf,
-											CT2A(m_pInternetFile->GetFileName()),
-											&zf_info,
-											NULL,
-											0,
-											NULL,
-											0,
-											"",
-											Z_DEFLATED,
-											Z_DEFAULT_COMPRESSION,
-											0,
-											MAX_WBITS,
-											DEF_MEM_LEVEL,
-											Z_DEFAULT_STRATEGY,
-											CT2A(strPassword),
-											crc);
+					CT2A(m_pInternetFile->GetFileName()),
+					&zf_info,
+					NULL,
+					0,
+					NULL,
+					0,
+					"",
+					Z_DEFLATED,
+					Z_DEFAULT_COMPRESSION,
+					0,
+					MAX_WBITS,
+					DEF_MEM_LEVEL,
+					Z_DEFAULT_STRATEGY,
+					CT2A(strPassword),
+					crc);
 			}
 			else
 			{
 				nRet = zipOpenNewFileInZip(zf,
-									   CT2A(m_pInternetFile->GetFileName()),
-									   &zf_info,
-									   NULL,
-									   0,
-									   NULL,
-									   0,
-									   "",
-									   Z_DEFLATED,
-									   Z_DEFAULT_COMPRESSION);
+					CT2A(m_pInternetFile->GetFileName()),
+					&zf_info,
+					NULL,
+					0,
+					NULL,
+					0,
+					"",
+					Z_DEFLATED,
+					Z_DEFAULT_COMPRESSION);
 			}
 
 			m_pInternetFile = m_pFtp->OpenFile(strFileName, GENERIC_READ);
@@ -406,7 +407,7 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 
 			zipCloseFileInZip(zf);
 			m_pInternetFile->Close();
-			if(ProgressBar != NULL)	ProgressBar->SetPos(++nComplete);
+			if (ProgressBar != NULL)	ProgressBar->SetPos(++nComplete);
 		}
 
 		zipClose(zf, "");
@@ -417,14 +418,176 @@ BOOL CFTPConnector::DownloadMultiFile(std::vector<CString> vecHash, LPCTSTR strL
 	{
 		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(0), 255);
 		pEx->Delete();
-		
+
 		return FALSE;
 	}
 }
 
-BOOL CFTPConnector::UploadFile(LPCTSTR strLocalFilePath, LPCTSTR strRemoteDir)
+BOOL CFTPConnector::UploadFile(LPCTSTR strLocalFilePath, LPCTSTR strRemotePath)
 {
-	return TRUE;
+	try
+	{
+		if (!m_bConnect)	//throw(TEXT("연결상태를 확인하세요));
+		{
+			m_strErrorMessage = TEXT("연결상태를 확인하세요");
+			return FALSE;
+		}
+
+		time_t nt;
+		tm* tmdata = NULL;
+		time(&nt);
+		localtime_s(tmdata, &nt);
+
+		m_pInternetFile = m_pFtp->OpenFile(strRemotePath, GENERIC_WRITE);
+		FILE* pFile;
+		_tfopen_s(&pFile, strLocalFilePath, TEXT("rb"));
+
+		if (pFile == NULL)
+		{
+			m_strErrorMessage = TEXT("파일을 찾을 수 없습니다");
+			return FALSE;
+		}
+
+		BYTE byFileBuf[MAX_BUFFER_SIZE];
+		UINT readSize;
+		do
+		{
+			readSize = ::fread(&byFileBuf, sizeof(BYTE), MAX_BUFFER_SIZE, pFile);
+			m_pInternetFile->Write(byFileBuf, MAX_BUFFER_SIZE);
+		} while (readSize != 0);
+
+		fclose(pFile);
+
+		return TRUE;
+	}
+	catch (CInternetException* pEx)
+	{
+		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(0), 255);
+		pEx->Delete();
+
+		return FALSE;
+	}
+}
+
+BOOL CFTPConnector::RenameFile(LPCTSTR strPreName, LPCTSTR strNewName)
+{
+	try
+	{
+		CString strOldDirectory;
+		m_pFtp->GetCurrentDirectory(strOldDirectory);
+		m_pFtp->SetCurrentDirectory(TEXT("/"));
+
+		CFtpFileFind finder(m_pFtp);
+		BOOL bWorking = finder.FindFile(TEXT("*"));
+		if (!bWorking)
+		{
+			m_strErrorMessage = TEXT("파일을 찾을 수 없습니다");
+			return FALSE;
+		}
+		if (finder.IsDirectory())
+		{
+			m_strErrorMessage = TEXT("파일이 아닙니다");
+			return FALSE;
+		}
+
+		BOOL bRes = m_pFtp->Rename(strPreName, strNewName);
+		if (!bRes)
+		{
+			m_strErrorMessage = TEXT("이름 변경에 실패하였습니다");
+			return FALSE;
+		}
+
+		m_pFtp->SetCurrentDirectory(strOldDirectory);
+		return bRes;
+	}
+	catch (CInternetException* pEx)
+	{
+		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(0), 255);
+		pEx->Delete();
+
+		return FALSE;
+	}
+}
+
+BOOL CFTPConnector::RemoveFile(LPCTSTR strRemotePath)
+{
+	try
+	{
+		CString strOldDirectory;
+		m_pFtp->GetCurrentDirectory(strOldDirectory);
+		m_pFtp->SetCurrentDirectory(TEXT("/"));
+
+		CFtpFileFind finder(m_pFtp);
+		BOOL bWorking = finder.FindFile(strRemotePath);
+		if (!bWorking)
+		{
+			m_strErrorMessage = TEXT("파일을 찾을 수 없습니다");
+			return FALSE;
+		}
+		if (finder.IsDirectory())
+		{
+			m_strErrorMessage = TEXT("파일이 아닙니다");
+			return FALSE;
+		}
+
+		BOOL bRes = m_pFtp->Remove(strRemotePath);
+		if (!bRes)
+		{
+			m_strErrorMessage = TEXT("파일 삭제에 실패하였습니다");
+			return FALSE;
+		}
+
+		m_pFtp->SetCurrentDirectory(strOldDirectory);
+		return bRes;
+	}
+	catch (CInternetException* pEx)
+	{
+		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(0), 255);
+		pEx->Delete();
+
+		return FALSE;
+	}
+}
+
+BOOL CFTPConnector::RemoveDir(LPCTSTR strRemotePath)
+{
+	try
+	{
+		CString strOldDirectory;
+		m_pFtp->GetCurrentDirectory(strOldDirectory);
+		m_pFtp->SetCurrentDirectory(TEXT("/"));
+
+		CFtpFileFind finder(m_pFtp);
+		BOOL bWorking = finder.FindFile(strRemotePath);
+		if (!bWorking)
+		{
+			m_strErrorMessage = TEXT("파일을 찾을 수 없습니다");
+			return FALSE;
+		}
+
+		if (!finder.IsDirectory())
+		{
+			m_strErrorMessage = TEXT("디렉토리가 아닙니다");
+			return FALSE;
+		}
+
+		BOOL bRes = m_pFtp->RemoveDirectory(strRemotePath);
+		if (!bRes)
+		{
+			m_strErrorMessage = TEXT("디렉토리 삭제에 실패하였습니다");
+			return FALSE;
+		}
+
+		m_pFtp->SetCurrentDirectory(strOldDirectory);
+		return bRes;
+	}
+	catch (CInternetException* pEx)
+	{
+		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(0), 255);
+		pEx->Delete();
+
+		return FALSE;
+	}
 }
 
 CString CFTPConnector::GetErrMsg()

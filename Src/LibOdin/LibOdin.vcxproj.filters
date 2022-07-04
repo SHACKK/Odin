@@ -14,5 +14,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="CFtpConnector.cpp" />
+    <ClCompile Include="TEMP.cpp" />
   </ItemGroup>
 </Project>

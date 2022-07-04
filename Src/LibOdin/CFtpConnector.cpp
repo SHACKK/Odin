@@ -225,8 +225,6 @@ BOOL CFTPConnector::DownloadSingleFile(LPCTSTR strHash, LPCTSTR strLocalPath, LP
 			return FALSE;
 		}
 
-		m_pInternetFile = m_pFtp->OpenFile(strFullFilePath, GENERIC_READ);
-
 		if (strPassword != NULL)
 		{
 			int nRet = zipOpenNewFileInZip3(zf,

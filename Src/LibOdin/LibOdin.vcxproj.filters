@@ -7,13 +7,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="_LibOdin.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="CFtpConnector.h" />
+    <ClInclude Include="Ftp.h" />
+    <ClInclude Include="Zipper.h" />
+    <ClInclude Include="APIEntry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="CFtpConnector.cpp" />
-    <ClCompile Include="TEMP.cpp" />
+    <ClCompile Include="Ftp.cpp" />
+    <ClCompile Include="Zipper.cpp" />
+    <ClCompile Include="APIEntry.cpp" />
   </ItemGroup>
 </Project>

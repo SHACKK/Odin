@@ -17,7 +17,7 @@ typedef struct ST_FTP_INFO
 		, strUserPW(NULL)
 		, bPassive(MODE_PASSIVE)
 	{}
-};
+}ST_FTP_INFO;
 
 // [단일 파일 다운로드]
 //	_in			stFtpInfo		: FTP 서버 연결정보

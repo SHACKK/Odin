@@ -1,5 +1,5 @@
 #pragma once
-#include "zip.h"
+#include <zip.h>
 
 #define MAX_BUFFER_SIZE 1024*128
 
@@ -13,6 +13,6 @@ public:
 	~CZipper();
 	BOOL CreateZipFile(LPCTSTR strLocalPath);
 	BOOL CloseZipFile();
-	BOOL Zip(LPCTSTR strFileName, BYTE* pFileBuffer, LPCTSTR strPassword = NULL);
+	BOOL Zip(LPCTSTR strFileName, BYTE* pFileBuffer, unsigned int nFileLength, LPCTSTR strPassword = NULL);
 };
 

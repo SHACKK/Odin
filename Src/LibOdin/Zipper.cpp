@@ -27,7 +27,7 @@ BOOL CZipper::CloseZipFile()
 	return TRUE;
 }
 
-BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, LPCTSTR strPassword)
+BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, unsigned int nFileLength, LPCTSTR strPassword)
 {
 	if (zf == NULL)
 		return FALSE;
@@ -49,7 +49,7 @@ BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, LPCTSTR strPassword)
 	if (strPassword != NULL)
 	{
 		crc = crc32(0L, Z_NULL, 0);
-		crc = crc32(crc, (const Bytef*)pFileBuffer, (uInt)sizeof(pFileBuffer));
+		crc = crc32(crc, (const Bytef*)pFileBuffer, nFileLength);
 		if (crc == 0)
 		{
 			return FALSE;
@@ -89,8 +89,8 @@ BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, LPCTSTR strPassword)
 			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION);
 	}
-
-	zipWriteInFileInZip(zf, (const void*)pFileBuffer, (unsigned int)sizeof(pFileBuffer));
+	
+	zipWriteInFileInZip(zf, (const void*)pFileBuffer, nFileLength);
 	zipCloseFileInZip(zf);
 
 	return TRUE;

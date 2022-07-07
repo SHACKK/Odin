@@ -23,13 +23,8 @@ private:
 	CString m_strErrorMessage;
 	CString m_strDirectoryCache;
 	BOOL m_bConnectFlag;
-	std::vector<CString> m_vecFailed;
-
-	//임시
 	BOOL m_bDiscovered;
-	CString m_strFullFilePath;
-	CString m_strRecentPath;
-	void SearchFile(CFtpFileFind* finder, LPCTSTR pszFileName, LPCTSTR pszStartDir);
+	std::vector<CString> m_vecFailed;
 
 public:
 	CFtp();
@@ -41,9 +36,8 @@ public:
 	std::vector<CString> GetEveryThing(LPCTSTR pszDirectory, BOOL bIncludePath = FALSE);
 	void GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszStartDirectory = TEXT("/"));
 	ULONGLONG GetFileSize(LPCTSTR pszFilePath);
-	BYTE* DownloadFileInMemory(LPCTSTR pszRemotePath);
+	BOOL DownloadFileInMemory(LPCTSTR pszRemotePath, BYTE* pszBuffer, ULONGLONG ulBufferSize);
 	CString GetErrorMessage();
-	//임시
-	CString GetFullFilePath(LPCTSTR pszFileName, LPCTSTR pszRemoteDir);
+	CString GetDirectoryCache();
 };
 

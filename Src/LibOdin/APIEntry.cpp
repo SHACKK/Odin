@@ -17,14 +17,16 @@ BOOL DownloadSingleFile(ST_FTP_INFO stFtpInfo, LPCTSTR pszHash, LPCTSTR strLocal
 
 		CString strFilePath;
 		Ftp.GetFilePath(pszHash, &strFilePath);
-		//CString strFilePath = Ftp.GetFullFilePath(pszHash, TEXT("/"));
 
 		if (strFilePath.IsEmpty())	throw CString(TEXT("파일을 찾을 수 없습니다"));
 		if (ProgressBar != NULL)	
 			ProgressBar->SetPos(30);
 
-		BYTE* pFileBuffer = Ftp.DownloadFileInMemory(strFilePath.GetBuffer(0));
-		if (pFileBuffer == nullptr)
+		ULONGLONG ulBufferSize = Ftp.GetFileSize(strFilePath);
+		if (ulBufferSize == 0)	throw CString(TEXT("파일크기를 가져올 수 없습니다"));
+
+		BYTE* pFileBuffer = new BYTE[ulBufferSize];
+		if(!Ftp.DownloadFileInMemory(strFilePath.GetBuffer(0), pFileBuffer, ulBufferSize))
 		{
 			delete[] pFileBuffer;
 			throw CString(TEXT("파일 다운로드 실패"));
@@ -32,10 +34,8 @@ BOOL DownloadSingleFile(ST_FTP_INFO stFtpInfo, LPCTSTR pszHash, LPCTSTR strLocal
 		if (ProgressBar != NULL)	
 			ProgressBar->SetPos(50);
 
-		ULONGLONG nFileSize = Ftp.GetFileSize(strFilePath.GetBuffer(0));
-		if (nFileSize == 0)	throw CString(TEXT("파일크기를 가져올 수 없습니다"));
 
-		if (!Zipper.Zip(pszHash, pFileBuffer, (unsigned int)nFileSize, strPassword))
+		if (!Zipper.Zip(pszHash, pFileBuffer, (unsigned int)ulBufferSize, strPassword))
 		{
 			delete[] pFileBuffer;
 			throw CString(TEXT("파일 압축 실패"));
@@ -79,21 +79,23 @@ BOOL DownloadMultiFile(ST_FTP_INFO stFtpInfo, std::vector<CString> vecHash, LPCT
 		int nCount = 0;
 		for (auto iter : vecHash)
 		{
-			//CString strFilePath = Ftp.GetFilePath(iter);
-			CString strFilePath = Ftp.GetFullFilePath(iter, TEXT("/"));
+
+			CString strFilePath;
+			Ftp.GetFilePath(iter, &strFilePath);
 			if (strFilePath.IsEmpty())	throw CString(TEXT("파일을 찾을 수 없습니다"));
 
-			BYTE* pFileBuffer = Ftp.DownloadFileInMemory(strFilePath);
-			if (pFileBuffer == NULL)
+			ULONGLONG ulBufferSize = Ftp.GetFileSize(strFilePath.GetBuffer(0));
+			if (ulBufferSize == 0)	throw CString(TEXT("파일크기를 가져올 수 없습니다"));
+
+			BYTE* pFileBuffer = new BYTE[ulBufferSize];
+			if (!Ftp.DownloadFileInMemory(strFilePath, pFileBuffer, ulBufferSize))
 			{
 				delete[] pFileBuffer;
 				throw CString(TEXT("파일 다운로드 실패"));
 			}
 
-			ULONGLONG nFileSize = Ftp.GetFileSize(strFilePath.GetBuffer(0));
-			if (nFileSize == 0)	throw CString(TEXT("파일크기를 가져올 수 없습니다"));
 
-			if (!Zipper.Zip(iter, pFileBuffer, (unsigned int)nFileSize, strPassword))
+			if (!Zipper.Zip(iter, pFileBuffer, (unsigned int)ulBufferSize, strPassword))
 			{
 				delete[] pFileBuffer;
 				throw CString(TEXT("파일 압축 실패"));

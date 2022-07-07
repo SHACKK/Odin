@@ -152,20 +152,26 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 {
 	try
 	{
+		m_bDiscovered = FALSE;
+		if (!m_bConnectFlag)	throw CString(TEXT("연결상태를 확인하세요"));
+
 		if (m_pFinder == NULL)
 			m_pFinder = new CFtpFileFind(m_pFtp);
 
 		CString strOriginDirectory;
 		m_pFtp->GetCurrentDirectory(strOriginDirectory);
 
-		if (!m_strRecentPath.IsEmpty())
+		if (!m_strDirectoryCache.IsEmpty())
 		{
 			CString strTemp;
-			strTemp.Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), pszFileName);
+			strTemp.Format(TEXT("%s/%s"), m_strDirectoryCache.GetBuffer(0), pszFileName);
 			BOOL bTemp = m_pFinder->FindFile(strTemp);
 			if (bTemp)
 			{
-				strDestBuffer->Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), pszFileName);
+				strDestBuffer->Format(TEXT("%s/%s"), m_strDirectoryCache.GetBuffer(0), pszFileName);
+				delete m_pFinder;
+				m_pFinder = NULL;
+
 				return;
 			}
 		}
@@ -178,8 +184,8 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 			bWorking = m_pFinder->FindNextFile();
 			if (pszFileName == m_pFinder->GetFileName())
 			{
-				m_strRecentPath = m_pFinder->GetFilePath();
-				strDestBuffer->Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), m_pFinder->GetFileName().GetBuffer(0));
+				m_strDirectoryCache = m_pFinder->GetFilePath();
+				strDestBuffer->Format(TEXT("%s/%s"), m_strDirectoryCache.GetBuffer(0), m_pFinder->GetFileName().GetBuffer(0));
 				m_bDiscovered = TRUE;
 
 				return;
@@ -198,21 +204,36 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 		for (iter = vecChildDir.rbegin(); iter != vecChildDir.rend(); iter++)
 		{
 			if (m_bDiscovered)
+			{
+				m_pFtp->SetCurrentDirectory(strOriginDirectory);
+				if (m_bDiscovered && (m_pFinder != NULL))
+				{
+					delete m_pFinder;
+					m_pFinder = NULL;
+				}
+
 				return;
+			}
 
 			this->GetFilePath(pszFileName, strDestBuffer, *iter);
 		}
 
 		m_pFtp->SetCurrentDirectory(strOriginDirectory);
-		if(m_bDiscovered && (m_pFinder != NULL))
+		if (m_bDiscovered && (m_pFinder != NULL))
+		{
 			delete m_pFinder;
+			m_pFinder = NULL;
+		}
 
 		return;
 	}
 	catch (CInternetException* pEx)
 	{
 		if (m_bDiscovered && (m_pFinder != NULL))
+		{
 			delete m_pFinder;
+			m_pFinder = NULL;
+		}
 
 		DWORD nErrorCode = ::GetLastError();
 		CString strErrMsg;
@@ -222,41 +243,52 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 
 		return;
 	}
+	catch (CString ErrorMessage)
+	{
+		if (m_bDiscovered && (m_pFinder != NULL))
+		{
+			delete m_pFinder;
+			m_pFinder = NULL;
+		}
+
+		m_strErrorMessage = ErrorMessage;
+
+		return;
+	}
 }
 
-BYTE* CFtp::DownloadFileInMemory(LPCTSTR pszFilePath)
+BOOL CFtp::DownloadFileInMemory(LPCTSTR pszFilePath, BYTE* pszBuffer, ULONGLONG ulBufferSize)
 {
 	if (!m_bConnectFlag)
 	{
 		m_strErrorMessage = TEXT("연결상태를 확인하세요");
-		return nullptr;
+		return FALSE;
 	}
 
 	try
 	{
 		m_pInternetFile = m_pFtp->OpenFile(pszFilePath, GENERIC_READ);
-		ULONGLONG nFileSize, nLeavingSize;
-		nFileSize = m_pInternetFile->GetLength();
-		nLeavingSize = nFileSize;
-		BYTE* pFileData = new BYTE[nFileSize];
+		ULONGLONG nLeavingSize;
+		nLeavingSize = ulBufferSize;
 		UINT readSize;
 		do
 		{
 			if (nLeavingSize < MAX_BUFFER_SIZE)
 			{
-				readSize = m_pInternetFile->Read(pFileData, (UINT)nLeavingSize);
-				pFileData += readSize;
+				readSize = m_pInternetFile->Read(pszBuffer, (UINT)nLeavingSize);
+				pszBuffer += readSize;
 				nLeavingSize -= readSize;
 				continue;
 			}
-			readSize = m_pInternetFile->Read(pFileData, MAX_BUFFER_SIZE);
-			pFileData += readSize;
+			readSize = m_pInternetFile->Read(pszBuffer, MAX_BUFFER_SIZE);
+			pszBuffer += readSize;
 			nLeavingSize -= readSize;
 		} while (nLeavingSize != 0);
 		m_pInternetFile->Close();
-		pFileData -= nFileSize;
+		m_pInternetFile = NULL;
+		pszBuffer -= ulBufferSize;
 
-		return pFileData;
+		return TRUE;
 	}
 	catch (CInternetException* pEx)
 	{
@@ -268,7 +300,7 @@ BYTE* CFtp::DownloadFileInMemory(LPCTSTR pszFilePath)
 		pEx->GetErrorMessage(strErrMsg.GetBuffer(0), 255);
 		m_strErrorMessage.Format(TEXT("%d : %s"), nErrorCode, strErrMsg.GetBuffer(0));
 		pEx->Delete();
-		return nullptr;
+		return FALSE;
 	}
 }
 
@@ -277,17 +309,26 @@ CString CFtp::GetErrorMessage()
 	return m_strErrorMessage;
 }
 
+CString CFtp::GetDirectoryCache()
+{
+	return m_strDirectoryCache;
+}
+
 ULONGLONG CFtp::GetFileSize(LPCTSTR pszFilePath)
 {
 	try
 	{
 		if (!m_bConnectFlag)	throw CString(TEXT("연결상태를 확인하세요"));
 
-		m_pInternetFile = m_pFtp->OpenFile(pszFilePath, GENERIC_READ);
-		ULONGLONG nFileSize = m_pInternetFile->GetLength();
+		CFtpFileFind finder(m_pFtp);
+		BOOL bWorking = finder.FindFile(pszFilePath);
+		if (!bWorking)	throw CString(TEXT("파일을 찾을 수 없습니다"));
+		bWorking = finder.FindNextFile();
 
-		delete m_pInternetFile;
-		return nFileSize;
+		ULONGLONG ulSize = finder.GetLength();
+
+		finder.Close();
+		return ulSize;
 	}
 	catch (CInternetException* pEx)
 	{
@@ -308,95 +349,5 @@ ULONGLONG CFtp::GetFileSize(LPCTSTR pszFilePath)
 
 		m_strErrorMessage = ErrorMessage;
 		return 0;
-	}
-}
-
-CString CFtp::GetFullFilePath(LPCTSTR pszFileName, LPCTSTR pszRemoteDir)
-{
-	try
-	{
-		if (!m_bConnectFlag)	throw CString(TEXT("연결상태를 확인하세요"));
-
-		m_bDiscovered = FALSE;
-		CString strOriginDir;
-		std::vector<CString> vecChildDir;
-
-		if (!(m_pFtp->GetCurrentDirectory(strOriginDir))) return m_strFullFilePath;
-		if (!(m_pFtp->SetCurrentDirectory(pszRemoteDir))) return m_strFullFilePath;
-
-		CFtpFileFind finder(m_pFtp);
-		SearchFile(&finder, pszFileName, pszRemoteDir);
-		m_pFtp->SetCurrentDirectory(strOriginDir);
-		return m_strFullFilePath;
-	}
-	catch (CInternetException* pEx)
-	{
-		int nLength = m_strErrorMessage.GetLength();
-		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(nLength), nLength);
-		pEx->Delete();
-
-		return CString(TEXT(""));
-	}
-	catch (CString pstrErrorMessage)
-	{
-		m_strErrorMessage = pstrErrorMessage.GetBuffer(0);
-		return CString(TEXT(""));
-	}
-}
-
-void CFtp::SearchFile(CFtpFileFind* finder, LPCTSTR pszFileName, LPCTSTR pszStartDir)
-{
-	try
-	{
-		if (!m_strRecentPath.IsEmpty())
-		{
-			CString strTemp;
-			strTemp.Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), pszFileName);
-			BOOL bTemp = finder->FindFile(strTemp);
-			if (bTemp)
-			{
-				m_strFullFilePath.Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), pszFileName);
-				return;
-			}
-		}
-
-		std::vector<CString> vecChildDir;
-		m_pFtp->SetCurrentDirectory(pszStartDir);
-		BOOL bWorking = finder->FindFile(TEXT("*"));
-		while (bWorking)
-		{
-			bWorking = finder->FindNextFile();
-			if (pszFileName == finder->GetFileName())
-			{
-				m_strRecentPath = finder->GetFilePath();
-				m_strFullFilePath.Format(TEXT("%s/%s"), m_strRecentPath.GetBuffer(0), finder->GetFileName().GetBuffer(0));
-				m_bDiscovered = TRUE;
-
-				return;
-			}
-			if (finder->IsDirectory())
-			{
-				CString strChildDir;
-				strChildDir.Format(TEXT("%s/%s"), finder->GetFilePath().GetBuffer(0), finder->GetFileName().GetBuffer(0));
-				vecChildDir.push_back(strChildDir);
-			}
-		}
-
-		// 벡터 정렬
-		std::sort(vecChildDir.begin(), vecChildDir.end());
-		std::vector<CString>::reverse_iterator iter;
-		for (iter = vecChildDir.rbegin(); iter != vecChildDir.rend(); iter++)
-		{
-			if (m_bDiscovered)
-				return;
-
-			SearchFile(finder, pszFileName, *iter);
-		}
-	}
-	catch (CInternetException* pEx)
-	{
-		int nLength = m_strErrorMessage.GetLength();
-		pEx->GetErrorMessage(m_strErrorMessage.GetBuffer(nLength), nLength);
-		pEx->Delete();
 	}
 }

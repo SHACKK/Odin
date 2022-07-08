@@ -1,7 +1,6 @@
 ﻿#ifndef PCH_H
 #define PCH_H
 
-#include <afxsock.h>
 #include <afxinet.h>
 #include <afxcmn.h>
 #include <stdio.h>

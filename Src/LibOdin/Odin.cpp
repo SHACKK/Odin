@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "APIEntry.h"
+#include "Odin.h"
 
 BOOL DownloadSingleFile(ST_FTP_INFO stFtpInfo, LPCTSTR pszHash, LPCTSTR strLocalPath, LPCTSTR strPassword, CProgressCtrl* ProgressBar)
 {

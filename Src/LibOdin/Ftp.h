@@ -30,14 +30,17 @@ public:
 	CFtp();
 	CFtp(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bMode = MODE_PASSIVE);
 	~CFtp();
-
+	
+	// Connect Method
 	BOOL Connect(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bMode = MODE_PASSIVE);
 	BOOL DisConnect();
+
+	// File Information Method
 	std::vector<CString> GetEveryThing(LPCTSTR pszDirectory, BOOL bIncludePath = FALSE);
 	void GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszStartDirectory = TEXT("/"));
 	ULONGLONG GetFileSize(LPCTSTR pszFilePath);
+
+	// Download Method
 	BOOL DownloadFileInMemory(LPCTSTR pszRemotePath, BYTE* pszBuffer, ULONGLONG ulBufferSize);
 	CString GetErrorMessage();
-	CString GetDirectoryCache();
 };
-

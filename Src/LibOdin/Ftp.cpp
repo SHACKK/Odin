@@ -309,11 +309,6 @@ CString CFtp::GetErrorMessage()
 	return m_strErrorMessage;
 }
 
-CString CFtp::GetDirectoryCache()
-{
-	return m_strDirectoryCache;
-}
-
 ULONGLONG CFtp::GetFileSize(LPCTSTR pszFilePath)
 {
 	try

@@ -15,4 +15,3 @@ public:
 	BOOL CloseZipFile();
 	BOOL Zip(LPCTSTR strFileName, BYTE* pFileBuffer, unsigned int nFileLength, LPCTSTR strPassword = NULL);
 };
-

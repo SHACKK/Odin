@@ -26,11 +26,3 @@ BOOL DownloadMultiFile(ST_FILE_INFO stFileInfo, std::vector<CString> vecHash, LP
 - _in_opt   strPassword  :  비밀번호 여부
 - _in_opt   ProgressBar  :  Progress Control에 대한 포인터
 ```
-
-## [ 에러 메시지 반환 ]
-- CString GetErrMsg();
-- _example
-```c++
-CString strErrorMessage = this.GetErrMsg();
-_tprintf(TEXT("%s\n"), strErrorMessage);
-```

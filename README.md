@@ -1,5 +1,6 @@
 # LibOdin
 - The Odin library can download, compress, and encrypt files using the FTP protocol.
+- used zlib
 
 ## [ 단일 파일 다운로드 ]
 - DownloadSingleFile

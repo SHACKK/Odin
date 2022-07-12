@@ -19,6 +19,11 @@ typedef struct ST_FTP_INFO
 	{}
 }ST_FTP_INFO;
 
+class CFtpError
+{
+
+};
+
 HANDLE CreateFtpHandle(ST_FTP_INFO connectInfo);
 void DestroyFtpHandle(HANDLE hFtp);
 BOOL DownloadFile(HANDLE hFtp, LPCSTR pszHash, std::vector<unsigned char>& outBin);

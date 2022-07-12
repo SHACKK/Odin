@@ -81,6 +81,7 @@ BOOL DownloadSingleFile(ST_FTP_INFO stFtpInfo, LPCTSTR pszHash, LPCTSTR strLocal
 
 BOOL DownloadMultiFile(ST_FTP_INFO stFtpInfo, std::vector<CString> vecHash, LPCTSTR strLocalPath, LPCTSTR strPassword, CProgressCtrl* ProgressBar)
 {
+	
 	try
 	{
 		CFtp Ftp;
@@ -136,3 +137,4 @@ BOOL DownloadMultiFile(ST_FTP_INFO stFtpInfo, std::vector<CString> vecHash, LPCT
 		return FALSE;
 	}
 }
+

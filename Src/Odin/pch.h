@@ -11,4 +11,6 @@
 
 #pragma comment(lib, "Cabinet.lib")
 
+#include "ErrorMessage.h"
+
 #endif

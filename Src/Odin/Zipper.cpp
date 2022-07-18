@@ -27,7 +27,7 @@ BOOL CZipper::CloseZipFile()
 	return TRUE;
 }
 
-BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, unsigned int nFileLength, LPCTSTR strPassword)
+BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, unsigned int nFileLength, LPCTSTR strPassword, FP_DOWNLOAD_PROGRESS fpCallback)
 {
 	if (zf == NULL)
 		return FALSE;
@@ -90,6 +90,8 @@ BOOL CZipper::Zip(LPCTSTR strFileName,  BYTE* pFileBuffer, unsigned int nFileLen
 			Z_DEFAULT_COMPRESSION);
 	}
 	
+	int nRead = 0;
+
 	zipWriteInFileInZip(zf, (const void*)pFileBuffer, nFileLength);
 	zipCloseFileInZip(zf);
 

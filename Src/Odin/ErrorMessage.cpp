@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ErrorMessage.h"
 
 CErrorMessage* CErrorMessage::m_pInst = nullptr;

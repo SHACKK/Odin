@@ -1,3 +1,5 @@
+#include <vector>
+#include <string>
 #include "pch.h"
 #include "Odin.h"
 
@@ -8,6 +10,8 @@ HANDLE CreateFtpHandle(ST_FTP_INFO connectInfo)
 
 void DestroyFtpHandle(HANDLE hFtp)
 {
+	std::vector<std::string> vecStr;
+	vecStr.
 }
 
 BOOL DownloadFile(HANDLE hFtp, LPCSTR pszHash, std::vector<unsigned char>& outBin)
@@ -93,9 +97,12 @@ BOOL DownloadMultiFile(ST_FTP_INFO stFtpInfo, std::vector<CString> vecHash, LPCT
 				delete[] pFileBuffer;
 				throw CString(TEXT("파일 압축 실패"));
 			}
-			if(fpCallback != nullptr)
+
+			if (fpCallback != nullptr)
+			{
 				fpCallback(nFileIndex, nFileCount);
-			nFileIndex++;
+				nFileIndex++;
+			}
 
 			delete[] pFileBuffer;
 		}

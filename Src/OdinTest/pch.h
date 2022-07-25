@@ -14,6 +14,8 @@
 #include <tchar.h>
 #include <vector>
 #include <afxinet.h>
-#include <APIEntry.h>
+
+#pragma comment(lib, "zlib.lib")
+#include "../Src/Odin/Odin.h"
 
 #endif //PCH_H

@@ -113,6 +113,9 @@ BOOL COdinTestDlg::OnInitDialog()
 	vecHash.push_back(TEXT("KISTI 사이버 공격 탐지 교육 자료.pdf"));
 	vecHash.push_back(TEXT("데모 녹화본.mp4"));
 	vecHash.push_back(TEXT("한글이지롱.txt"));
+	CString strDomain = TEXT("akdan.iptime.org");
+	WORD wPort = 21;
+	CString strIP = IpFromDomain(strDomain, wPort);
 	//DownloadSingleFile(stFtpInfo, TEXT("자소서_창영.docx"), TEXT("C:\\Users\\LCH\\Desktop\\다운로드파일즈\\Result.zip"), TEXT("qlalf1231@"));
 	DownloadMultiFile(stFtpInfo, vecHash, TEXT("C:\\Users\\LCH\\Desktop\\다운로드파일즈\\Result.zip"), TEXT("qlalf1231@"));
 

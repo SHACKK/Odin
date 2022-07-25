@@ -183,8 +183,9 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MDd_x86.lib;LibOdin_MDd_x86.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -209,8 +210,9 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MTd_x86.lib;LibOdin_MTd_x86.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -234,8 +236,9 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MDd_x64.lib;LibOdin_MDd_x64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -260,8 +263,9 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MTd_x64.lib;LibOdin_MTd_x64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -290,8 +294,9 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MD_x86.lib;LibOdin_MD_x86.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -320,8 +325,9 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MT_x86.lib;LibOdin_MT_x86.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -350,8 +356,9 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MD_x64.lib;LibOdin_MD_x64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -380,8 +387,9 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../lib/Libz;../../lib/LibOdin</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Libz_MT_x64.lib;LibOdin_MT_x64.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../zlib/Lib/$(Platform)$(Configuration)/</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -424,6 +432,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\OdinTest.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Odin\Odin.vcxproj">
+      <Project>{4a2fcda0-b28d-4809-afca-8d1cc697daee}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

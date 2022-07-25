@@ -40,9 +40,6 @@ public:
 	// strDir = c:\
 	// strFIleName : test
 
-	//BOOL GrepFiles(LPCTSTR pszDir, std::vector<std::string>& outFIlesInDir, bool bIncludeDir = false);
-
-	std::vector<CString> GetEveryThing(LPCTSTR pszDirectory, BOOL bIncludePath = FALSE);
 	void GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszStartDirectory = TEXT("/"));
 	ULONGLONG GetFileSize(LPCTSTR pszFilePath);
 

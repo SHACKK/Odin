@@ -19,4 +19,3 @@ public:
 	void SetErrorMessage(CString strErrorMessage);
 	CString GetErrorMessage();
 };
-

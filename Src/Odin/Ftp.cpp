@@ -11,14 +11,14 @@ CFtp::CFtp()
 	m_bDiscovered = FALSE;
 }
 
-CFtp::CFtp(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bMode)
+CFtp::CFtp(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bPassive)
 {
 	m_pFtp = NULL;
 	m_pSession = NULL;
 	m_pInternetFile = NULL;
 	m_bConnectFlag = FALSE;
 
-	BOOL bRes = this->Connect(pszIP, wPort, pszUserID, pszUserPW, bMode);
+	BOOL bRes = this->Connect(pszIP, wPort, pszUserID, pszUserPW, bPassive);
 }
 
 CFtp::~CFtp()
@@ -27,7 +27,7 @@ CFtp::~CFtp()
 		this->DisConnect();
 }
 
-BOOL CFtp::Connect(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bMode)
+BOOL CFtp::Connect(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUserPW, BOOL bPassive)
 {
 	if (m_bConnectFlag)
 		return TRUE;
@@ -35,7 +35,7 @@ BOOL CFtp::Connect(LPCTSTR pszIP, WORD wPort, LPCTSTR pszUserID, LPCTSTR pszUser
 	try
 	{
 		m_pSession = new CInternetSession;
-		m_pFtp = m_pSession->GetFtpConnection(pszIP, pszUserID, pszUserPW, (INTERNET_PORT)wPort, bMode);
+		m_pFtp = m_pSession->GetFtpConnection(pszIP, pszUserID, pszUserPW, (INTERNET_PORT)wPort, bPassive);
 		m_bConnectFlag = TRUE;
 
 		return TRUE;
@@ -114,7 +114,6 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 		}
 
 		std::vector<CString> vecChildDir;
-		m_pFtp->SetCurrentDirectory(pszStartDirectory);
 		BOOL bWorking = m_pFinder->FindFile(TEXT("*"));
 		while (bWorking)
 		{
@@ -152,6 +151,7 @@ void CFtp::GetFilePath(LPCTSTR pszFileName, CString* strDestBuffer, LPCTSTR pszS
 				return;
 			}
 
+			m_pFtp->SetCurrentDirectory(*iter);
 			this->GetFilePath(pszFileName, strDestBuffer, *iter);
 		}
 
@@ -276,7 +276,7 @@ ULONGLONG CFtp::GetFileSize(LPCTSTR pszFilePath)
 	}
 	catch (CString ErrorMessage)
 	{
-		if(m_pInternetFile != NULL)
+		if (m_pInternetFile != NULL)
 			delete m_pInternetFile;
 
 		m_strErrorMessage = ErrorMessage;
